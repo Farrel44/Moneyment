@@ -1,0 +1,47 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+
+# Gradle files
+.gradle
+build/
+*.apk
+*.apks
+*.aar
+*.jar
+*.war
+*.ear
+*.zip
+*.gz
+
+# Android Studio generated files
+.idea/
+*.iml
+*.ipr
+*.iws
+local.properties
+.DS_Store # macOS
+/captures
+
+# Build outputs
+/build
+
+# Logs
+*.log
+
+# Sensitive data
+local.properties
+secrets.properties
