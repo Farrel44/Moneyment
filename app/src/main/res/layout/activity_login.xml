@@ -89,12 +89,12 @@
             android:textSize="20sp" />
 
         <EditText
-            android:id="@+id/etUsername"
+            android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:background="@drawable/textbox"
-            android:hint="Username"
+            android:hint="Email"
             android:inputType="text"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
@@ -106,9 +106,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/textbox"
-            android:drawableLeft="@color/background"
             android:hint="Password"
-            android:inputType="text"
+            android:inputType="textPassword"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
             android:padding="10dp"
