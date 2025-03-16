@@ -1,6 +1,7 @@
 package com.example.moneyment
 
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -28,6 +29,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -36,6 +38,9 @@ class LoginActivity : AppCompatActivity() {
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         firebaseAuth = FirebaseAuth.getInstance()
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Mohon tunggu...")
+        progressDialog.setCancelable(false)
 
         if (firebaseAuth.currentUser != null){
             navigateToMainActivity()
@@ -76,7 +81,10 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
+        progressDialog.show()
+
         firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            progressDialog.dismiss()
             if (task.isSuccessful) {
                 val user = firebaseAuth.currentUser
 
@@ -84,7 +92,8 @@ class LoginActivity : AppCompatActivity() {
                     navigateToMainActivity()
                 } else {
                     Toast.makeText(this, "Akun belum terverifikasi! Periksa email Anda.", Toast.LENGTH_LONG).show()
-                    user?.sendEmailVerification()
+                    startActivity(Intent(this, EmailVerificationActivity::class.java))
+                    finish()
                 }
 
             } else {
@@ -97,15 +106,13 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
-                if (errorMessage.contains("Akun tidak ditemukan")) {
-                    showRegisterDialog(email)
-                }
             }
         }
     }
 
 
     private fun signInWithGoogle() {
+        progressDialog.show()
         val signInIntent = googleSignInClient.signInIntent
         signInLauncher.launch(signInIntent)
     }
@@ -119,6 +126,7 @@ class LoginActivity : AppCompatActivity() {
                     firebaseAuthWithGoogle(account.idToken!!)
                 }
             } catch (e: ApiException) {
+                progressDialog.dismiss()
                 Toast.makeText(this, "Google Sign-In gagal", Toast.LENGTH_SHORT).show()
             }
         }
@@ -127,8 +135,10 @@ class LoginActivity : AppCompatActivity() {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         try {
             firebaseAuth.signInWithCredential(credential).await()
+            progressDialog.dismiss()
             navigateToMainActivity()
         } catch (e: Exception) {
+            progressDialog.dismiss()
             Toast.makeText(this, "Sign In Gagal", Toast.LENGTH_SHORT).show()
         }
     }
