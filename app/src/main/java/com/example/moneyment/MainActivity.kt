@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
             progressDialog.show()
             logout()
         }
+
         enableEdgeToEdge()
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
