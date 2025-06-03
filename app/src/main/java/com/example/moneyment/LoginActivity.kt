@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.moneyment.databinding.ActivityLoginBinding
+import com.example.moneyment.repository.UserRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -29,6 +30,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var userRepository: UserRepository
     private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +40,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         firebaseAuth = FirebaseAuth.getInstance()
+        userRepository = UserRepository()
         progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Mohon tunggu...")
         progressDialog.setCancelable(false)
@@ -84,19 +87,30 @@ class LoginActivity : AppCompatActivity() {
         progressDialog.show()
 
         firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            progressDialog.dismiss()
             if (task.isSuccessful) {
                 val user = firebaseAuth.currentUser
 
                 if (user != null && user.isEmailVerified) {
-                    navigateToMainActivity()
+                    // Store/update user data in Firestore
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val success = userRepository.saveOrUpdateUser(user)
+                        progressDialog.dismiss()
+                        if (success) {
+                            navigateToMainActivity()
+                        } else {
+                            Toast.makeText(this@LoginActivity, "Login berhasil, tapi gagal menyimpan data", Toast.LENGTH_SHORT).show()
+                            navigateToMainActivity()
+                        }
+                    }
                 } else {
+                    progressDialog.dismiss()
                     Toast.makeText(this, "Akun belum terverifikasi! Periksa email Anda.", Toast.LENGTH_LONG).show()
                     startActivity(Intent(this, EmailVerificationActivity::class.java))
                     finish()
                 }
 
             } else {
+                progressDialog.dismiss()
                 val errorMessage = when (task.exception?.message) {
                     "There is no user record corresponding to this identifier. The user may have been deleted." ->
                         "Akun tidak ditemukan! Silakan daftar terlebih dahulu."
@@ -135,8 +149,22 @@ class LoginActivity : AppCompatActivity() {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         try {
             firebaseAuth.signInWithCredential(credential).await()
-            progressDialog.dismiss()
-            navigateToMainActivity()
+            val user = firebaseAuth.currentUser
+            
+            if (user != null) {
+                // Store/update user data in Firestore
+                val success = userRepository.saveOrUpdateUser(user)
+                progressDialog.dismiss()
+                if (success) {
+                    navigateToMainActivity()
+                } else {
+                    Toast.makeText(this, "Login berhasil, tapi gagal menyimpan data", Toast.LENGTH_SHORT).show()
+                    navigateToMainActivity()
+                }
+            } else {
+                progressDialog.dismiss()
+                Toast.makeText(this, "Sign In Gagal", Toast.LENGTH_SHORT).show()
+            }
         } catch (e: Exception) {
             progressDialog.dismiss()
             Toast.makeText(this, "Sign In Gagal", Toast.LENGTH_SHORT).show()

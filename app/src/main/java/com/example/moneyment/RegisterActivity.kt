@@ -10,12 +10,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.moneyment.databinding.ActivityRegisterBinding
+import com.example.moneyment.repository.UserRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -23,6 +27,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var progressDialog: ProgressDialog
     private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var userRepository: UserRepository
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +35,7 @@ class RegisterActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         firebaseAuth = FirebaseAuth.getInstance()
+        userRepository = UserRepository()
         progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Mohon tunggu...")
         progressDialog.setCancelable(false)
@@ -126,13 +132,27 @@ class RegisterActivity : AppCompatActivity() {
         firebaseAuth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Sign-Up berhasil dengan Google!", Toast.LENGTH_SHORT).show()
-                    navigateToMainActivity()
+                    val user = firebaseAuth.currentUser
+                    if (user != null) {
+                        // Store user data in Firestore
+                        CoroutineScope(Dispatchers.Main).launch {
+                            val success = userRepository.saveOrUpdateUser(user)
+                            if (success) {
+                                Toast.makeText(this@RegisterActivity, "Sign-Up berhasil dengan Google!", Toast.LENGTH_SHORT).show()
+                                navigateToMainActivity()
+                            } else {
+                                Toast.makeText(this@RegisterActivity, "Sign-Up berhasil, tapi gagal menyimpan data", Toast.LENGTH_SHORT).show()
+                                navigateToMainActivity()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this, "Sign-Up gagal: User tidak ditemukan", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     Toast.makeText(this, "Sign-Up gagal: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
-        }
+    }
 
 
     private fun navigateToVerificationPage() {

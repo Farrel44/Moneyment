@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/home"
-        android:title="Home"
+        android:id="@+id/nav_beranda"
+        android:title="Beranda"
         android:icon="@drawable/homesvg"/>
     <item
-        android:id="@+id/note"
-        android:title="Note"
+        android:id="@+id/nav_transaksi"
+        android:title="Transaksi"
         android:icon="@drawable/note"/>
     <item
-        android:id="@+id/add"
-        android:title="Add"
+        android:id="@+id/nav_catat"
+        android:title="Catat"
         android:icon="@drawable/addsvg"/>
     <item
-        android:id="@+id/analyst"
-        android:title="Analyst"
+        android:id="@+id/nav_analisa"
+        android:title="Analisa"
         android:icon="@drawable/analytic"/>
     <item
-        android:id="@+id/user"
-        android:title="User"
+        android:id="@+id/nav_profil"
+        android:title="Profil"
         android:icon="@drawable/user"/>
 </menu>
