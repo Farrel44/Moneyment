@@ -126,17 +126,27 @@ class AddTransactionActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener {
             saveTransaction()
         }
-    }
-
-    private fun updateTypeSelection() {
+    }    private fun updateTypeSelection() {
         if (transactionType == Transaction.TYPE_INCOME) {
+            // Income selected - green background with white text
             binding.btnIncome.setBackgroundResource(R.drawable.btngreen2)
+            binding.btnIncome.setTextColor(getColor(android.R.color.white))
+            
+            // Expenses not selected - outline with black text
             binding.btnExpenses.setBackgroundResource(R.drawable.button_outline)
-            binding.titleText.text = "Catat Pemasukan"
+            binding.btnExpenses.setTextColor(getColor(android.R.color.black))
+            
+            binding.titleText.text = if (isEditMode) "Edit Transaksi" else "Catat Pemasukan"
         } else {
+            // Income not selected - outline with black text
             binding.btnIncome.setBackgroundResource(R.drawable.button_outline)
+            binding.btnIncome.setTextColor(getColor(android.R.color.black))
+            
+            // Expenses selected - green background with white text
             binding.btnExpenses.setBackgroundResource(R.drawable.btngreen2)
-            binding.titleText.text = "Catat Pengeluaran"
+            binding.btnExpenses.setTextColor(getColor(android.R.color.white))
+            
+            binding.titleText.text = if (isEditMode) "Edit Transaksi" else "Catat Pengeluaran"
         }
     }
 
